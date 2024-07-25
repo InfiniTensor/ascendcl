@@ -1,4 +1,4 @@
-// #![doc = include_str!("../README.md")]
+#![doc = include_str!("../README.md")]
 #![cfg(detected_ascend)]
 
 #[macro_use]
@@ -36,8 +36,19 @@ pub fn finalize() {
     acl!(aclFinalize());
 }
 
+pub fn version() -> (i32, i32, i32) {
+    let mut ans = (0, 0, 0);
+    acl!(aclrtGetVersion(&mut ans.0, &mut ans.1, &mut ans.2));
+    return ans;
+}
+
+mod device;
+
+pub use device::Device;
+
 #[test]
 fn test_bindings() {
     init();
+    println!("version: {:?}", version());
     finalize();
 }

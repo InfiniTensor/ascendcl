@@ -5,4 +5,4 @@
 [![Documentation](https://docs.rs/ascendcl/badge.svg)](https://docs.rs/ascendcl)
 [![license](https://img.shields.io/github/license/InfiniTensor/ascendcl)](https://mit-license.org/)
 
-Safe AscendCL Runtime API bindings, see the [official documentation](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/80RC3alpha001/apiref/appdevgapi/aclcppdevg_03_0004.html) for details.
+Safe AscendCL Runtime API bindings based on CANN Toolkit 8.+, see the [official documentation](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/80RC3alpha001/apiref/appdevgapi/aclcppdevg_03_0004.html) for details.
