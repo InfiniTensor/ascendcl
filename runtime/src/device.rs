@@ -29,26 +29,21 @@ impl Device {
     }
 
     #[inline]
-    pub fn fetch() -> Option<Self> {
-        if Self::count() > 0 {
-            Some(Self::new(0))
-        } else {
-            None
-        }
-    }
-
     pub fn name(&self) -> &'static CStr {
         unsafe { CStr::from_ptr(crate::bindings::aclrtGetSocName()) }
     }
 
+    #[inline]
     pub fn ai_core(&self) -> usize {
         self.get(ACL_DEVICE_INFO_AI_CORE_NUM) as _
     }
 
+    #[inline]
     pub fn vector_core(&self) -> usize {
         self.get(ACL_DEVICE_INFO_VECTOR_CORE_NUM) as _
     }
 
+    #[inline]
     pub fn l2_cache(&self) -> MemSize {
         self.get(ACL_DEVICE_INFO_L2_SIZE).into()
     }
@@ -106,13 +101,6 @@ impl From<i64> for MemSize {
     #[inline]
     fn from(value: i64) -> Self {
         Self(value as _)
-    }
-}
-
-impl From<usize> for MemSize {
-    #[inline]
-    fn from(value: usize) -> Self {
-        Self(value)
     }
 }
 
