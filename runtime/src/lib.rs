@@ -11,19 +11,11 @@ pub mod bindings {
         ($f:expr) => {{
             #[allow(unused_imports)]
             use $crate::bindings::*;
-            #[allow(unused_unsafe)]
+            #[allow(unused_unsafe, clippy::macro_metavars_in_unsafe)]
             let err = unsafe { $f };
             assert_eq!(err, 0);
         }};
     }
-}
-
-pub trait AsRaw {
-    type Raw;
-    /// # Safety
-    ///
-    /// The caller must ensure that the returned item is dropped before the original item.
-    unsafe fn as_raw(&self) -> Self::Raw;
 }
 
 #[inline(always)]
@@ -45,9 +37,13 @@ pub fn version() -> (i32, i32, i32) {
 
 mod context;
 mod device;
+mod memory;
+mod stream;
 
 pub use context::{Context, CurrentCtx, NoCtxError};
 pub use device::Device;
+pub use memory::{memcpy_d2d, memcpy_d2h, memcpy_h2d, DevByte, DevMem, DevMemSpore};
+pub use stream::{Stream, StreamSpore};
 
 #[test]
 fn test_bindings() {

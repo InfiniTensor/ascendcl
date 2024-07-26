@@ -1,7 +1,5 @@
-﻿use crate::{
-    bindings::aclDeviceInfo::{self, *},
-    AsRaw,
-};
+﻿use crate::bindings::aclDeviceInfo::{self, *};
+use context_spore::AsRaw;
 use std::{ffi::CStr, fmt};
 
 #[repr(transparent)]

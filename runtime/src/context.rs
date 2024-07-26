@@ -1,4 +1,5 @@
-﻿use crate::{bindings::aclrtContext, AsRaw, Device};
+﻿use crate::{bindings::aclrtContext, Device};
+use context_spore::{AsRaw, RawContainer};
 use std::{
     mem::{align_of, size_of},
     ptr::null_mut,
@@ -129,6 +130,7 @@ impl CurrentCtx {
         Device::new(dev as _)
     }
 
+    /// 同步上下文对应的卡上所有上下文的所有流。
     #[inline]
     pub fn sync_device(&self) {
         acl!(aclrtSynchronizeDevice());
@@ -167,15 +169,15 @@ impl CurrentCtx {
         &*(raw as *const _ as *const _)
     }
 
-    // /// Wrap a raw object in a `RawContainer`.
-    // ///
-    // /// # Safety
-    // ///
-    // /// The raw object must be created in this [`Context`].
-    // #[inline]
-    // pub unsafe fn wrap_raw<T>(&self, raw: T) -> RawContainer<T> {
-    //     RawContainer { ctx: self.0, raw }
-    // }
+    /// Wrap a raw object in a `RawContainer`.
+    ///
+    /// # Safety
+    ///
+    /// The raw object must be created in this [`Context`].
+    #[inline]
+    pub unsafe fn wrap_raw<T: Unpin>(&self, rss: T) -> RawContainer<aclrtContext, T> {
+        RawContainer { ctx: self.0, rss }
+    }
 }
 
 #[test]
