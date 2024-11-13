@@ -19,3 +19,6 @@ log = "0.4"
 bindgen.workspace = true
 build-script-cfg.workspace = true
 search-ascend-tools = { version = "0.0", path = "../search-ascend-tools" }
+
+[dev-dependencies]
+rand = "0.8"

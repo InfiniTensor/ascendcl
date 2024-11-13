@@ -9,7 +9,7 @@ impl_spore!(Stream and StreamSpore by (CurrentCtx, aclrtStream));
 
 impl CurrentCtx {
     #[inline]
-    pub fn queue(&self) -> Stream {
+    pub fn stream(&self) -> Stream {
         let mut stream = null_mut();
         acl!(aclrtCreateStream(&mut stream));
         Stream(unsafe { self.wrap_raw(stream) }, PhantomData)

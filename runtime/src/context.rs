@@ -1,4 +1,7 @@
-﻿use crate::{bindings::aclrtContext, Device};
+﻿use crate::{
+    bindings::{aclrtContext, aclrtGetCurrentContext},
+    Device,
+};
 use context_spore::{AsRaw, RawContainer};
 use std::{
     mem::{align_of, size_of},
@@ -18,14 +21,13 @@ impl Device {
         const { assert!(size_of::<Context>() == size_of::<[usize; 2]>()) }
         const { assert!(align_of::<Context>() == align_of::<usize>()) }
 
-        let mut current = null_mut();
-        acl!(aclrtGetCurrentContext(&mut current));
+        let current = get_current_ctx();
 
         let dev = unsafe { self.as_raw() };
         let mut ctx = null_mut();
         acl!(aclrtCreateContext(&mut ctx, dev as _));
 
-        if !current.is_null() {
+        if let Some(current) = current {
             acl!(aclrtSetCurrentContext(current));
         }
 
@@ -38,15 +40,14 @@ impl Device {
 
     #[inline]
     pub fn fetch_default(&self) -> Context {
-        let mut current = null_mut();
-        acl!(aclrtGetCurrentContext(&mut current));
+        let current = get_current_ctx();
 
         let dev = unsafe { self.as_raw() };
         let mut ctx = null_mut();
         acl!(aclrtSetDevice(dev as _));
         acl!(aclrtGetCurrentContext(&mut ctx));
 
-        if !current.is_null() {
+        if let Some(current) = current {
             acl!(aclrtSetCurrentContext(current));
         }
 
@@ -87,23 +88,30 @@ impl Context {
     #[inline]
     pub fn apply<T>(&self, f: impl FnOnce(&CurrentCtx) -> T) -> T {
         // 先检查当前上下文
-        let mut current = null_mut();
-        acl!(aclrtGetCurrentContext(&mut current));
-        if current == self.ctx {
-            // 当前上下文是目标上下文
-            // 直接执行
-            f(&CurrentCtx(self.ctx))
-        } else {
-            // 当前上下文不是目标上下文
-            // 加载目标上下文
-            acl!(aclrtSetCurrentContext(self.ctx));
-            // 执行依赖上下文的操作
-            let ans = f(&CurrentCtx(self.ctx));
-            if !current.is_null() {
-                // 原上下文非空，还原上下文
-                acl!(aclrtSetCurrentContext(current));
+        match get_current_ctx() {
+            Some(current) => {
+                if current == self.ctx {
+                    // 当前上下文是目标上下文
+                    // 直接执行
+                    f(&CurrentCtx(self.ctx))
+                } else {
+                    // 当前上下文不是目标上下文
+                    // 加载目标上下文
+                    acl!(aclrtSetCurrentContext(self.ctx));
+                    // 执行依赖上下文的操作
+                    let ans = f(&CurrentCtx(self.ctx));
+                    // 原上下文非空，还原上下文
+                    acl!(aclrtSetCurrentContext(current));
+                    ans
+                }
             }
-            ans
+            None => {
+                // 当前上下文不是目标上下文
+                // 加载目标上下文
+                acl!(aclrtSetCurrentContext(self.ctx));
+                // 执行依赖上下文的操作
+                f(&CurrentCtx(self.ctx))
+            }
         }
     }
 }
@@ -139,13 +147,9 @@ impl CurrentCtx {
     /// 如果存在当前上下文，在当前上下文上执行依赖上下文的操作。
     #[inline]
     pub fn apply_current<T>(f: impl FnOnce(&Self) -> T) -> Result<T, NoCtxError> {
-        let mut current = null_mut();
-        acl!(aclrtGetCurrentContext(&mut current));
-        if !current.is_null() {
-            Ok(f(&Self(current)))
-        } else {
-            Err(NoCtxError)
-        }
+        get_current_ctx()
+            .ok_or(NoCtxError)
+            .map(|current| f(&Self(current)))
     }
 
     /// 直接指定当前上下文，并执行依赖上下文的操作。
@@ -177,6 +181,15 @@ impl CurrentCtx {
     #[inline]
     pub unsafe fn wrap_raw<T: Unpin>(&self, rss: T) -> RawContainer<aclrtContext, T> {
         RawContainer { ctx: self.0, rss }
+    }
+}
+
+fn get_current_ctx() -> Option<aclrtContext> {
+    let mut current = null_mut();
+    match unsafe { aclrtGetCurrentContext(&mut current) } {
+        0 => Some(current),
+        107002 => None,
+        err => panic!("aclrtGetCurrentContext failed with error code {err}"),
     }
 }
 

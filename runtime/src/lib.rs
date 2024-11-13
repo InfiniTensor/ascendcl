@@ -36,14 +36,23 @@ pub fn version() -> (i32, i32, i32) {
 }
 
 mod context;
+mod dev_mem;
 mod device;
-mod memory;
+mod event;
+mod host_mem;
 mod stream;
 
 pub use context::{Context, CurrentCtx, NoCtxError};
+pub use dev_mem::{memcpy_d2d, memcpy_d2h, memcpy_h2d, DevByte, DevMem, DevMemSpore};
 pub use device::Device;
-pub use memory::{memcpy_d2d, memcpy_d2h, memcpy_h2d, DevByte, DevMem, DevMemSpore};
+pub use event::{Event, EventSpore};
+pub use host_mem::{HostMem, HostMemSpore};
 pub use stream::{Stream, StreamSpore};
+
+struct Blob<P> {
+    ptr: P,
+    len: usize,
+}
 
 #[test]
 fn test_bindings() {
