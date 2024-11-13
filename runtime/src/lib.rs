@@ -49,5 +49,5 @@ pub use stream::{Stream, StreamSpore};
 fn test_bindings() {
     init();
     println!("version: {:?}", version());
-    finalize();
+    finalize()
 }

@@ -3,4 +3,4 @@
 !/.github/*
 
 /target
-/deploy
+/Cargo.lock

@@ -165,7 +165,7 @@ impl CurrentCtx {
     /// The `raw` context must be the current pushed context.
     /// Generally, this method only used for [`RawContainer::ctx`] with limited lifetime.
     #[inline]
-    pub unsafe fn from_raw(raw: &aclrtContext) -> &Self {
+    pub unsafe fn from_raw<'ctx>(raw: &aclrtContext) -> &'ctx Self {
         &*(raw as *const _ as *const _)
     }
 
@@ -212,5 +212,5 @@ fn test_behavior() {
     acl!(aclrtGetCurrentContext(&mut current));
     assert_eq!(current, default);
 
-    crate::finalize();
+    crate::finalize()
 }

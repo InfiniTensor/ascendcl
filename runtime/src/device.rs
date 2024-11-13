@@ -108,4 +108,5 @@ fn test() {
     for i in 0..Device::count() {
         println!("{}", Device::new(i as _).info());
     }
+    crate::finalize()
 }
