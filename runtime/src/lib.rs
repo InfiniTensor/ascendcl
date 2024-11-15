@@ -43,6 +43,7 @@ mod host_mem;
 mod stream;
 
 pub use context::{Context, CurrentCtx, NoCtxError};
+pub use context_spore::{impl_spore, AsRaw, ContextResource, ContextSpore, RawContainer};
 pub use dev_mem::{memcpy_d2d, memcpy_d2h, memcpy_h2d, DevByte, DevMem, DevMemSpore};
 pub use device::Device;
 pub use event::{Event, EventSpore};
